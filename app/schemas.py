@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 # Blog Schemas
@@ -19,12 +20,14 @@ class BlogOut(BlogBase):
     id: int
     slug: str
     author_id: int
+    created_at: datetime
 
 
 class BlogOutWithAuthor(BlogBase):
     id: int
     slug: str
     author_id: int
+    created_at: datetime
     author_fullname: str
     author_username: str
 

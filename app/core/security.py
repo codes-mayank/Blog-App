@@ -42,7 +42,6 @@ def verify_token(token: str) -> Optional[Token]:
     
 def get_current_user(request: Request) -> Optional[Token]:
     token = request.cookies.get(settings.ACCESS_TOKEN_COOKIE_NAME)
-    print("Token from cookie:", token)
     if not token:
         return None
     payload = verify_token(token)

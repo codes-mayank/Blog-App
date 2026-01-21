@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from app.core.config import settings
-from app.core.security import get_password_hash, create_access_token, verify_password, create_token_payload
+from app.core.security import get_password_hash, create_access_token, verify_password, create_token_payload, get_current_user
 from app.database import get_db
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.schemas import UserIn, UserLogin, UserOut
+from app.schemas import UserIn, UserLogin, UserOut, Token
 from app.models import User
 
 
@@ -37,6 +37,20 @@ async def signup(response: Response, user: UserIn, db: Session = Depends(get_db)
         httponly=True
     )
     return db_user
+
+@router.get("/me", response_model=UserOut)
+async def read_users_me(token: Token = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    user = db.query(User).filter(User.id == token.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(settings.ACCESS_TOKEN_COOKIE_NAME)
+    return {"message": "Logged out successfully"}
 
 @router.post("/login", response_model=UserOut)
 async def login(response: Response, user: UserLogin, db: Session = Depends(get_db)):
